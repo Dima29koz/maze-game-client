@@ -3,7 +3,7 @@ import { createPinia } from 'pinia'
 
 import App from './App.vue'
 import router from './router'
-import VueCookies from 'vue-cookies'
+import components from '@/components/UI'
 
 // Vuetify
 import 'vuetify/styles'
@@ -11,6 +11,10 @@ import '@mdi/font/css/materialdesignicons.css'
 import { createVuetify } from 'vuetify'
 
 const app = createApp(App)
+
+components.forEach((component) => {
+  app.component(component.name, component)
+})
 
 app.use(createPinia())
 app.use(
@@ -21,6 +25,5 @@ app.use(
   })
 )
 app.use(router)
-app.use(VueCookies)
 
 app.mount('#app')
