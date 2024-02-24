@@ -54,6 +54,18 @@ const router = createRouter({
       name: 'play',
       component: () => import('../views/PlayView.vue'),
       meta: { requiresAuth: true }
+    },
+    {
+      path: '/game_lobby',
+      name: 'game_lobby',
+      component: () => import('../views/GameLobbyView.vue'),
+      meta: { requiresAuth: true }
+    },
+    {
+      path: '/game',
+      name: 'game',
+      component: () => import('../views/GameView.vue'),
+      meta: { requiresAuth: true }
     }
   ]
 })

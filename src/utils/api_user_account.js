@@ -126,3 +126,8 @@ export const edit_password = requestHandler(
     }
   }
 )
+
+export const user_games = requestHandler(async function () {
+  const response = await axios.get('/api/user_account/user_games')
+  return response.data
+})

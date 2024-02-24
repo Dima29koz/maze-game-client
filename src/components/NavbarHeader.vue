@@ -23,7 +23,7 @@
           <template v-slot:activator="{ props }">
             <v-btn v-bind="props">
               <v-avatar :image="avatarSrc" size="32"> </v-avatar>
-              <p class="my-0">{{ currentUser.username }}</p>
+              <p class="my-0 ms-2">{{ currentUser.username }}</p>
               <v-icon icon="mdi-menu-down"></v-icon>
             </v-btn>
           </template>

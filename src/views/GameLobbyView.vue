@@ -1,0 +1,160 @@
+<template>
+  <v-container>
+    <div class="d-flex justify-space-between py-2">
+      <h1>
+        Комната: <span id="get-room-name">{{ room_name }}</span>
+      </h1>
+      <v-btn @click="leaveRoom" color="red">Покинуть игру</v-btn>
+    </div>
+    <div v-if="is_creator">
+      <v-btn @click="startGame" :disabled="!room_data.is_ready">Начать игру</v-btn>
+    </div>
+    <div class="d-flex">
+      <div>
+        <template v-for="(player_data, i) in room_data.players" :key="i">
+          <game-lobby-player-card
+            :player="player_data"
+            :creator="room_data.creator"
+          ></game-lobby-player-card>
+        </template>
+
+        <template v-for="i in room_data.players_amount - room_data.players.length" :key="i">
+          <div>empty slot</div>
+        </template>
+
+        <template v-for="(bot_data, i) in room_data.bots" :key="i">
+          <game-lobby-player-card :player="bot_data"></game-lobby-player-card>
+        </template>
+      </div>
+      <div id="map-container" class="container d-flex justify-content-center">
+        <canvas class="border" id="map"></canvas>
+      </div>
+    </div>
+  </v-container>
+</template>
+
+<script>
+import { io } from 'socket.io-client'
+import { useCurrentUserStore } from '@/stores/currentUserStore'
+import GameLobbyPlayerCard from '@/components/cards/GameLobbyPlayerCard.vue'
+
+export default {
+  setup() {
+    const currentUserStore = useCurrentUserStore()
+    return { currentUserStore }
+  },
+
+  components: {
+    GameLobbyPlayerCard
+  },
+
+  data: () => ({
+    room_name: '',
+    room_id: null,
+    socket: null,
+    room_data: {
+      bots: [],
+      bots_amount: 0,
+      players: [],
+      players_amount: 0,
+      creator: '',
+      is_ready: false
+    }
+  }),
+
+  methods: {
+    leaveRoom() {
+      this.socket.emit('leave', { room_id: this.room_id })
+      this.$router.push({ name: 'play' })
+    },
+    startGame() {
+      this.socket.emit('start', { room_id: this.room_id })
+    },
+
+    drawSpawnMap(data) {
+      console.log(data)
+      const field = data.field
+      const spawn_point = data.spawn_info
+      const drawingCanvas = document.getElementById('map')
+      const div = document.getElementById('map-container')
+      let width = div.clientWidth
+      let height = div.clientHeight
+      let tile_size = height < width ? height / field.length : width / field[0].length
+      if (drawingCanvas && drawingCanvas.getContext) {
+        let context = drawingCanvas.getContext('2d')
+        context.canvas.width = tile_size * field[0].length
+        context.canvas.height = tile_size * field.length
+        let cells = drawField(context)
+        if (spawn_point == null) {
+          drawingCanvas.onclick = (e) => {
+            cells.forEach((cell_obj) => {
+              if (cell_obj !== null) {
+                if (context.isPointInPath(cell_obj, e.offsetX, e.offsetY)) {
+                  this.socket.emit('set_spawn', { room_id: this.room_id, spawn: cell_obj.data })
+                  drawingCanvas.onclick = null
+                  drawCell(cell_obj.data, context, true)
+                }
+              }
+            })
+          }
+        } else {
+          drawCell(data.spawn_info, context, true)
+        }
+      }
+
+      function drawField(context) {
+        let cells = []
+        for (let row of field) {
+          for (let cell of row) {
+            if (cell != null) {
+              cells.push(drawCell(cell, context))
+            }
+          }
+        }
+        return cells
+      }
+
+      function drawCell(cell, context, is_pressed = false) {
+        let cell_obj = new Path2D()
+        let x = (cell.x - 1) * tile_size
+        let y = (cell.y - 1) * tile_size
+        cell_obj.rect(x + 2, y + 2, tile_size - 4, tile_size - 4)
+        cell_obj.data = { x: cell.x, y: cell.y }
+        context.fillStyle = is_pressed ? '#453E26' : '#6b623c'
+        context.fill(cell_obj)
+        return cell_obj
+      }
+    }
+  },
+
+  computed: {
+    is_creator() {
+      return this.room_data.creator === this.currentUserStore.username
+    }
+  },
+
+  async mounted() {
+    this.room_name = this.$route.query.room
+    this.room_id = this.$route.query.room_id
+
+    this.socket = io('/game_room')
+    this.socket.on('connect', () => {
+      this.socket.emit('join', { room_id: this.room_id })
+    })
+
+    this.socket.on('join', (data) => {
+      console.log(data)
+      this.room_data = data
+    })
+
+    this.socket.on('get_spawn', (data) => {
+      this.drawSpawnMap(data)
+    })
+
+    //redirect всех игроков в комнате в игру
+    this.socket.on('start', () => {
+      this.$router.push({ name: 'game', query: { room: this.room_name, room_id: this.room_id } })
+    })
+  }
+}
+</script>
