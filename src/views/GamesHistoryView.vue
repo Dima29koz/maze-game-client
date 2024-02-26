@@ -13,6 +13,20 @@
       hover
       class="pa-2"
     >
+      <template v-slot:item="{ item, index }">
+        <tr>
+          <td>{{ index + 1 }}</td>
+          <td>{{ item.name }}</td>
+          <td>{{ item.status }}</td>
+          <td>{{ item.winner }}</td>
+          <td>
+            <v-btn @click="joinGame(item)" density="compact" icon>
+              <v-icon icon="mdi-login" color="success"></v-icon>
+            </v-btn>
+          </td>
+        </tr>
+      </template>
+
       <template v-slot:bottom></template>
     </v-data-table>
   </v-container>
@@ -30,12 +44,22 @@ export default {
         games_won: 0
       },
       headers: [
-        { title: '#', key: 'id', sortable: false },
+        { title: '#', key: '_', sortable: false },
         { title: 'Лобби', key: 'name' },
         { title: 'Статус', key: 'status' },
         { title: 'Победитель', key: 'winner' },
         { title: 'Присоединиться', key: '_', sortable: false }
       ]
+    }
+  },
+
+  methods: {
+    joinGame(game) {
+      if (game.status === 'created') {
+        this.$router.push({ name: 'game_lobby', query: { room: game.name, room_id: game.id } })
+      } else {
+        this.$router.push({ name: 'game', query: { room: game.name, room_id: game.id } })
+      }
     }
   },
 
