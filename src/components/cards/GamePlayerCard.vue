@@ -42,7 +42,7 @@
 </template>
 
 <script>
-import { get_user_avatar_src } from '@/utils/api_game'
+import { get_user_avatar_src } from '@/utils/api_user_account'
 
 export default {
   setup() {

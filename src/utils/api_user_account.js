@@ -74,25 +74,28 @@ export const reset_password = requestHandler(async function (token, pwd, pwd_rep
   }
 })
 
-export const registration = requestHandler(async function (userName, email, password) {
-  try {
-    const response = await axios.post(
-      '/api/user_account/registration',
-      {
-        username: userName,
-        email: email,
-        pwd: password
-      },
-      { headers: { 'X-ORIGIN': window.location.origin } }
-    )
-    return response.data
-  } catch (e) {
-    if (e.response.status == 400 && e.response.data?.msg == 'username is not allowed') {
-      return e.response.data
+export const registration = requestHandler(
+  async function (userName, email, password, passwordRepeat) {
+    try {
+      const response = await axios.post(
+        '/api/user_account/registration',
+        {
+          username: userName,
+          email: email,
+          pwd: password,
+          pwd_repeat: passwordRepeat
+        },
+        { headers: { 'X-ORIGIN': window.location.origin } }
+      )
+      return response.data
+    } catch (e) {
+      if (e.response.status == 400 && e.response.data?.msg == 'username is not allowed') {
+        return e.response.data
+      }
+      throw e
     }
-    throw e
   }
-})
+)
 
 export const confirm_email = requestHandler(async function (token) {
   const response = await axios.post('/api/user_account/confirm_email', { token: token })
@@ -131,3 +134,7 @@ export const user_games = requestHandler(async function () {
   const response = await axios.get('/api/user_account/user_games')
   return response.data
 })
+
+export function get_user_avatar_src(username) {
+  return '/api/user_account/img/' + username
+}

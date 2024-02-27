@@ -17,7 +17,12 @@ export default {
   },
   methods: {
     async createUser(new_user) {
-      const res = await registration(new_user.username, new_user.email, new_user.password)
+      const res = await registration(
+        new_user.username,
+        new_user.email,
+        new_user.password,
+        new_user.password_repeat
+      )
       if (res?.msg == 'username is not allowed') {
         this.error = 'Пользователь с таким именем уже существует'
       } else {
