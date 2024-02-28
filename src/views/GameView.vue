@@ -4,6 +4,9 @@
     <v-row no-gutters>
       <v-col sm="5" md="4">
         <div class="font-weight-bold text-center">
+          <div v-if="game_data.error" class="bg-error rounded-t">
+            Для данной игры доступна только история ходов
+          </div>
           <div v-if="game_data.next_player" class="bg-info rounded-t">
             Ход игрока {{ game_data.next_player }}
           </div>
@@ -19,14 +22,14 @@
         </div>
         <game-controls-card
           @action="emitAction"
-          :showControls="!game_data.is_ended"
+          :showControls="!game_data.is_ended && !game_data.error"
           :isActive="is_active"
           :allowed_abilities="allowed_abilities"
         ></game-controls-card>
       </v-col>
       <v-col class="ms-sm-4">
         <div class="d-flex flex-wrap overflow-auto" style="max-height: 348px">
-          <template v-for="(player_data, i) in players_stats" :key="i">
+          <template v-for="(player_data, i) in game_data.players_stats" :key="i">
             <game-player-card
               :player="player_data"
               :rules_stats="rules.player_stat"
@@ -46,7 +49,6 @@ import GameTurnCard from '@/components/cards/GameTurnCard.vue'
 import GamePlayerCard from '@/components/cards/GamePlayerCard.vue'
 import GameControlsCard from '@/components/cards/GameControlsCard.vue'
 import { useCurrentUserStore } from '@/stores/currentUserStore'
-import { get_game_data, get_players_stats } from '@/utils/api_game'
 
 export default {
   setup() {
@@ -66,32 +68,24 @@ export default {
     socket: null,
     rules: {},
     game_data: {
+      error: null,
       is_ended: true,
       next_player: '',
       turns: [],
-      winner_name: ''
+      winner_name: '',
+      players_stats: []
     },
-    players_stats: [],
     is_active: false,
     allowed_abilities: {}
   }),
 
   methods: {
-    async getGameData() {
-      this.game_data = await get_game_data(this.room_id)
-      console.log(this.game_data)
-
-      if (!this.game_data.is_ended) {
-        this.socket.emit('get_allowed_abilities', { room_id: this.room_id })
-      }
-    },
-
-    async getPlayersStats() {
-      this.players_stats = await get_players_stats(this.room_id)
-    },
-
     emitAction(action, direction) {
-      this.socket.emit('action', { room_id: this.room_id, action: action, direction: direction })
+      this.is_active = false
+      this.socket.emit('action', {
+        action: action,
+        direction: direction
+      })
     },
 
     async scrollDownChatWindow() {
@@ -111,35 +105,43 @@ export default {
   },
 
   async mounted() {
-    this.room_name = this.$route.query.room
-    this.room_id = this.$route.query.room_id
-    this.socket = io('/game')
-
-    this.socket.on('connect', () => {
-      this.socket.emit('join', { room_id: this.room_id })
+    const token = this.$route.query.game
+    this.socket = io('/game', {
+      auth: {
+        token: token
+      }
     })
 
     this.socket.on('join', (data) => {
+      console.log(data)
       this.rules = data.rules
-      console.log(this.rules)
-      this.getGameData()
-      this.getPlayersStats()
+      this.room_id = data.room_id
+      this.room_name = data.room_name
+      this.game_data = data.game_data
+
+      if (!this.game_data.is_ended && !this.game_data.error) {
+        this.socket.emit('get_allowed_abilities')
+      }
     })
 
     this.socket.on('turn_info', (data) => {
       console.log(data)
       this.game_data.turns.push(data.turn_data)
-      this.players_stats = data.players_stat
-      this.socket.emit('get_allowed_abilities', { room_id: this.room_id })
-    })
-
-    this.socket.on('win_msg', (data) => {
+      this.game_data.players_stats = data.players_stats
+      this.game_data.next_player = data.next_player
       this.game_data.winner_name = data.winner_name
-      this.game_data.is_ended = true
-      this.game_data.next_player = ''
+
+      if (this.game_data.winner_name) {
+        this.is_ended = true
+      }
+
+      if (this.game_data.next_player === this.currentUserStore.username) {
+        this.socket.emit('get_allowed_abilities')
+      }
     })
 
     this.socket.on('set_allowed_abilities', (data) => {
+      console.log(data)
       this.game_data.next_player = data.next_player_name
       this.is_active = data.is_active
       this.allowed_abilities = data.allowed_abilities

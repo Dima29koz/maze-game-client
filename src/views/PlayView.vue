@@ -57,7 +57,8 @@ export default {
         this.createError = 'Комната с таким названием уже существует'
         return
       }
-      this.$router.push({ name: 'game_lobby', query: { room: res.name, room_id: res.id } })
+
+      this.$router.push({ name: 'game_lobby', query: { game: res.token } })
     },
 
     async joinRoom(roomData) {
@@ -72,9 +73,9 @@ export default {
       }
 
       if (res.state === 'created') {
-        this.$router.push({ name: 'game_lobby', query: { room: res.name, room_id: res.id } })
+        this.$router.push({ name: 'game_lobby', query: { game: res.token } })
       } else {
-        this.$router.push({ name: 'game', query: { room: res.name, room_id: res.id } })
+        this.$router.push({ name: 'game', query: { game: res.token } })
       }
     }
   }

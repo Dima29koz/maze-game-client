@@ -35,6 +35,7 @@
 
 <script>
 import { io } from 'socket.io-client'
+
 import { useCurrentUserStore } from '@/stores/currentUserStore'
 import GameLobbyPlayerCard from '@/components/cards/GameLobbyPlayerCard.vue'
 
@@ -64,17 +65,14 @@ export default {
 
   methods: {
     leaveRoom() {
-      this.socket.emit('leave', { room_id: this.room_id })
+      this.socket.emit('leave')
       this.$router.push({ name: 'play' })
     },
     startGame() {
-      this.socket.emit('start', { room_id: this.room_id })
+      this.socket.emit('start')
     },
 
-    drawSpawnMap(data) {
-      console.log(data)
-      const field = data.field
-      const spawn_point = data.spawn_info
+    drawSpawnMap(field, spawn_point) {
       const drawingCanvas = document.getElementById('map')
       const div = document.getElementById('map-container')
       let width = div.clientWidth
@@ -90,7 +88,7 @@ export default {
             cells.forEach((cell_obj) => {
               if (cell_obj !== null) {
                 if (context.isPointInPath(cell_obj, e.offsetX, e.offsetY)) {
-                  this.socket.emit('set_spawn', { room_id: this.room_id, spawn: cell_obj.data })
+                  this.socket.emit('set_spawn', { spawn: cell_obj.data })
                   drawingCanvas.onclick = null
                   drawCell(cell_obj.data, context, true)
                 }
@@ -98,7 +96,7 @@ export default {
             })
           }
         } else {
-          drawCell(data.spawn_info, context, true)
+          drawCell(spawn_point, context, true)
         }
       }
 
@@ -134,12 +132,19 @@ export default {
   },
 
   async mounted() {
-    this.room_name = this.$route.query.room
-    this.room_id = this.$route.query.room_id
+    const token = this.$route.query.game
+    this.socket = io('/game_room', {
+      auth: {
+        token: token
+      }
+    })
 
-    this.socket = io('/game_room')
-    this.socket.on('connect', () => {
-      this.socket.emit('join', { room_id: this.room_id })
+    this.socket.on('connect_error', (error) => {
+      console.log(error)
+    })
+
+    this.socket.on('error', (error) => {
+      console.log(error)
     })
 
     this.socket.on('join', (data) => {
@@ -148,12 +153,13 @@ export default {
     })
 
     this.socket.on('get_spawn', (data) => {
-      this.drawSpawnMap(data)
+      console.log(data)
+      this.drawSpawnMap(data.field, data.spawn_info)
     })
 
     //redirect всех игроков в комнате в игру
     this.socket.on('start', () => {
-      this.$router.push({ name: 'game', query: { room: this.room_name, room_id: this.room_id } })
+      this.$router.push({ name: 'game', query: { game: token } })
     })
   }
 }

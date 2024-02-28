@@ -2,13 +2,8 @@ import axios from 'axios'
 
 import { requestHandler } from './api_user_account'
 
-export const get_game_data = requestHandler(async function (room_id) {
-  const response = await axios.get('/api/game/game_data/' + room_id)
-  return response.data
-})
-
-export const get_players_stats = requestHandler(async function (room_id) {
-  const response = await axios.get('/api/game/players_stats/' + room_id)
+export const get_game_token = requestHandler(async function (room_id) {
+  const response = await axios.get('/api/game/get_token/' + room_id)
   return response.data
 })
 

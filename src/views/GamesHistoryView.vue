@@ -17,7 +17,7 @@
         <tr>
           <td>{{ index + 1 }}</td>
           <td>{{ item.name }}</td>
-          <td>{{ item.status }}</td>
+          <td>{{ getStateTitle(item.status) }}</td>
           <td>{{ item.winner }}</td>
           <td>
             <v-btn @click="joinGame(item)" density="compact" icon>
@@ -34,6 +34,7 @@
 
 <script>
 import { user_games } from '@/utils/api_user_account'
+import { get_game_token } from '@/utils/api_game'
 
 export default {
   data() {
@@ -49,17 +50,28 @@ export default {
         { title: 'Статус', key: 'status' },
         { title: 'Победитель', key: 'winner' },
         { title: 'Присоединиться', key: '_', sortable: false }
+      ],
+      states: [
+        { title: 'Создана', key: 'created' },
+        { title: 'Не завершена', key: 'running' },
+        { title: 'Завершена', key: 'ended' }
       ]
     }
   },
 
   methods: {
-    joinGame(game) {
+    async joinGame(game) {
+      const token = await get_game_token(game.id)
+
       if (game.status === 'created') {
-        this.$router.push({ name: 'game_lobby', query: { room: game.name, room_id: game.id } })
+        this.$router.push({ name: 'game_lobby', query: { game: token } })
       } else {
-        this.$router.push({ name: 'game', query: { room: game.name, room_id: game.id } })
+        this.$router.push({ name: 'game', query: { game: token } })
       }
+    },
+
+    getStateTitle(state) {
+      return this.states.find((p) => p.key === state).title
     }
   },
 
