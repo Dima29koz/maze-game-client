@@ -49,14 +49,16 @@ import GameTurnCard from '@/components/cards/GameTurnCard.vue'
 import GamePlayerCard from '@/components/cards/GamePlayerCard.vue'
 import GameControlsCard from '@/components/cards/GameControlsCard.vue'
 import { useCurrentUserStore } from '@/stores/currentUserStore'
+import { useNotificationsStore } from '@/stores/notificationsStore'
 import { useTocStore } from '@/stores/tocStore'
 
 export default {
   setup() {
     const currentUserStore = useCurrentUserStore()
     const tocStore = useTocStore()
+    const notificationsStore = useNotificationsStore()
     tocStore.hideFooter()
-    return { currentUserStore, tocStore }
+    return { currentUserStore, tocStore, notificationsStore }
   },
 
   components: {
@@ -67,7 +69,6 @@ export default {
 
   data: () => ({
     room_name: '',
-    room_id: null,
     socket: null,
     rules: {},
     game_data: {
@@ -119,10 +120,18 @@ export default {
       }
     })
 
+    this.socket.on('connect_error', () => {
+      this.notificationsStore.addNotification('Не удалось присоединиться к комнате.', 'warning')
+      this.$router.push({ name: 'play' })
+    })
+
+    this.socket.on('error', (error) => {
+      console.log(error)
+    })
+
     this.socket.on('join', (data) => {
       console.log(data)
       this.rules = data.rules
-      this.room_id = data.room_id
       this.room_name = data.room_name
       this.game_data = data.game_data
 

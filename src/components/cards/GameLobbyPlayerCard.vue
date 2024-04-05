@@ -1,14 +1,29 @@
 <template>
-  <div class="card bg-secondary my-1 border border-4 border-warning">
-    <div class="card-body d-flex py-2 align-items-center">
-      <div class="my-0 pe-2">
-        <v-avatar :image="avatarSrc" size="32"> </v-avatar>
-      </div>
-      <div v-if="is_creator" class="my-0 pe-2">⭐</div>
-      <h5 class="my-0">{{ player.name }}</h5>
-      <div class="ms-auto my-0">{{ is_spawned_icon }}</div>
-    </div>
-  </div>
+  <v-card class="mx-auto mb-1" density="compact" min-width="200">
+    <template v-slot:prepend v-if="player.name">
+      <v-avatar v-if="!is_bot" :image="avatarSrc" size="32"> </v-avatar>
+      <v-icon v-else icon="mdi-robot-angry" size="large"></v-icon>
+    </template>
+    <template v-slot:title>
+      <template v-if="player.name">
+        <v-badge v-if="is_creator" color="transparent" floating offset-y="8">
+          <template v-slot:badge>
+            <v-icon icon="mdi-star" color="amber-accent-3" size="x-large"></v-icon>
+          </template>
+          {{ player.name }}
+        </v-badge>
+        <div v-else>{{ player.name }}</div>
+      </template>
+      <div v-else class="text-caption text-center">Свободный слот</div>
+    </template>
+    <template v-slot:append>
+      <template v-if="player.name">
+        <V-icon v-if="player.is_spawned" icon="mdi-check-circle" color="success"></V-icon>
+        <V-icon v-else icon="mdi-close-circle" color="red"></V-icon>
+      </template>
+      <V-icon v-else icon="mdi-alert-circle" color="warning"></V-icon>
+    </template>
+  </v-card>
 </template>
 
 <script>
@@ -35,13 +50,14 @@ export default {
     creator: {
       type: String,
       default: ''
+    },
+    is_bot: {
+      type: Boolean,
+      default: false
     }
   },
 
   computed: {
-    is_spawned_icon() {
-      return this.player.is_spawned ? '🟢' : '🔴'
-    },
     is_creator() {
       return this.player.name === this.creator
     }

@@ -1,6 +1,6 @@
 <template>
   <v-container>
-    <div class="d-flex justify-space-between py-2">
+    <div class="d-flex justify-space-between align-center py-2">
       <h1>
         Комната: <span id="get-room-name">{{ room_name }}</span>
       </h1>
@@ -10,7 +10,7 @@
       <v-btn @click="startGame" :disabled="!room_data.is_ready">Начать игру</v-btn>
     </div>
     <div class="d-flex">
-      <div>
+      <div id="players-cards" class="me-4">
         <template v-for="(player_data, i) in room_data.players" :key="i">
           <game-lobby-player-card
             :player="player_data"
@@ -19,14 +19,18 @@
         </template>
 
         <template v-for="i in room_data.players_amount - room_data.players.length" :key="i">
-          <div>empty slot</div>
+          <game-lobby-player-card :creator="room_data.creator"></game-lobby-player-card>
         </template>
 
         <template v-for="(bot_data, i) in room_data.bots" :key="i">
-          <game-lobby-player-card :player="bot_data"></game-lobby-player-card>
+          <game-lobby-player-card
+            :player="bot_data"
+            :creator="room_data.creator"
+            :is_bot="true"
+          ></game-lobby-player-card>
         </template>
       </div>
-      <div id="map-container" class="container d-flex justify-content-center">
+      <div id="map-container">
         <canvas class="border" id="map"></canvas>
       </div>
     </div>
@@ -37,12 +41,14 @@
 import { io } from 'socket.io-client'
 
 import { useCurrentUserStore } from '@/stores/currentUserStore'
+import { useNotificationsStore } from '@/stores/notificationsStore'
 import GameLobbyPlayerCard from '@/components/cards/GameLobbyPlayerCard.vue'
 
 export default {
   setup() {
     const currentUserStore = useCurrentUserStore()
-    return { currentUserStore }
+    const notificationsStore = useNotificationsStore()
+    return { currentUserStore, notificationsStore }
   },
 
   components: {
@@ -75,11 +81,11 @@ export default {
     drawSpawnMap(field, spawn_point) {
       const drawingCanvas = document.getElementById('map')
       const div = document.getElementById('map-container')
-      let width = div.clientWidth
-      let height = div.clientHeight
-      let tile_size = height < width ? height / field.length : width / field[0].length
+      const width = div.clientWidth
+      const height = div.clientHeight
+      const tile_size = height < width ? height / field.length : width / field[0].length
       if (drawingCanvas && drawingCanvas.getContext) {
-        let context = drawingCanvas.getContext('2d')
+        const context = drawingCanvas.getContext('2d')
         context.canvas.width = tile_size * field[0].length
         context.canvas.height = tile_size * field.length
         let cells = drawField(context)
@@ -139,8 +145,9 @@ export default {
       }
     })
 
-    this.socket.on('connect_error', (error) => {
-      console.log(error)
+    this.socket.on('connect_error', () => {
+      this.notificationsStore.addNotification('Не удалось присоединиться к комнате.', 'warning')
+      this.$router.push({ name: 'play' })
     })
 
     this.socket.on('error', (error) => {
@@ -149,7 +156,8 @@ export default {
 
     this.socket.on('join', (data) => {
       console.log(data)
-      this.room_data = data
+      this.room_name = data.room_name
+      this.room_data = data.room_info
     })
 
     this.socket.on('get_spawn', (data) => {
