@@ -1,5 +1,5 @@
 <template>
-  <v-sheet class="pa-4 text-center mx-auto my-16 form-signin rounded" :elevation="8">
+  <v-sheet class="pa-4 text-center mx-auto my-sm-16 my-4 form-signin rounded" :elevation="8">
     <h1 class="h3 mb-4 fw-normal">Авторизация</h1>
     <v-alert
       v-if="alertMsg"
@@ -48,7 +48,7 @@
 import LoginForm from '@/components/forms/LoginForm.vue'
 import resetPasswordRequestForm from '@/components/forms/ResetPasswordRequestForm.vue'
 import { login, profile_data, reset_password_request } from '@/utils/api_user_account'
-import { useCurrentUserStore } from '../stores/currentUserStore'
+import { useCurrentUserStore } from '@/stores/currentUserStore'
 
 export default {
   setup() {

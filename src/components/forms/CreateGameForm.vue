@@ -1,10 +1,12 @@
 <template>
-  <v-form ref="form" @submit.prevent="submit" class="form-create-room">
+  <v-form ref="form" @submit.prevent="submit" class="form-create-room" autocomplete="off">
     <v-text-field
       v-model="room.name"
       :rules="[(v) => validateField(v, schema.name)]"
       :error-messages="error"
       label="Название комнаты"
+      name="new_room_name"
+      autocomplete="new-room-name"
     ></v-text-field>
 
     <v-text-field
@@ -12,6 +14,8 @@
       :rules="[(v) => validateField(v, schema.password)]"
       label="Пароль"
       type="password"
+      name="new_room_password"
+      autocomplete="new-room-password"
     ></v-text-field>
 
     <div class="d-sm-flex">

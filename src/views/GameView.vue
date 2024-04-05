@@ -49,11 +49,14 @@ import GameTurnCard from '@/components/cards/GameTurnCard.vue'
 import GamePlayerCard from '@/components/cards/GamePlayerCard.vue'
 import GameControlsCard from '@/components/cards/GameControlsCard.vue'
 import { useCurrentUserStore } from '@/stores/currentUserStore'
+import { useTocStore } from '@/stores/tocStore'
 
 export default {
   setup() {
     const currentUserStore = useCurrentUserStore()
-    return { currentUserStore }
+    const tocStore = useTocStore()
+    tocStore.hideFooter()
+    return { currentUserStore, tocStore }
   },
 
   components: {
@@ -102,6 +105,10 @@ export default {
       },
       deep: true
     }
+  },
+
+  unmounted() {
+    this.tocStore.reset()
   },
 
   async mounted() {

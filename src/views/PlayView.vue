@@ -1,6 +1,6 @@
 <template>
-  <v-card class="mt-4">
-    <v-tabs v-model="tab" color="primary">
+  <v-card class="my-sm-16 my-4 mx-auto card">
+    <v-tabs v-model="tab" color="primary" align-tabs="center">
       <v-tab value="create">
         <v-icon start> mdi-plus </v-icon>
         Создать
@@ -81,3 +81,10 @@ export default {
   }
 }
 </script>
+
+<style scoped>
+.card {
+  width: 100%;
+  max-width: 440px;
+}
+</style>

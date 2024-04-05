@@ -119,6 +119,7 @@
       ></v-list-item>
     </v-list>
   </v-navigation-drawer>
+  <navbar-footer v-if="tocStore.showFooter"></navbar-footer>
 </template>
 
 <script>
@@ -128,6 +129,7 @@ import { useCurrentUserStore } from '@/stores/currentUserStore'
 import { useTocStore } from '@/stores/tocStore'
 
 import ColorModeToggler from '@/components/UI/ColorModeToggler.vue'
+import NavbarFooter from '@/components/NavbarFooter.vue'
 
 export default {
   name: 'navbar-header',
@@ -150,7 +152,8 @@ export default {
     }
   },
   components: {
-    ColorModeToggler
+    ColorModeToggler,
+    NavbarFooter
   },
   methods: {
     logout() {

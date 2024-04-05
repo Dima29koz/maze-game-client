@@ -1,5 +1,5 @@
 <template>
-  <v-container id="rules-content" fluid class="pa-4 pa-sm-6 pa-md-8">
+  <v-container class="pa-4 pa-sm-6 pa-md-8 ms-xxl-16">
     <div class="d-flex justify-space-between">
       <h1 class="text-h3">Правила игры</h1>
     </div>

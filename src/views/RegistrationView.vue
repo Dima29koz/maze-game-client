@@ -1,5 +1,8 @@
 <template>
-  <RegistrationForm @register="createUser" :error="error"> </RegistrationForm>
+  <v-sheet class="pa-4 text-center mx-auto my-sm-16 my-4 form-register rounded" :elevation="8">
+    <h1 class="h3 mb-4 fw-normal">Регистрация</h1>
+    <registration-form @register="createUser" :error="error"> </registration-form>
+  </v-sheet>
 </template>
 
 <script>
@@ -33,4 +36,9 @@ export default {
 }
 </script>
 
-<style scoped></style>
+<style scoped>
+.form-register {
+  width: 100%;
+  max-width: 400px;
+}
+</style>

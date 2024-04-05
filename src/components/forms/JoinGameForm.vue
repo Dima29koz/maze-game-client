@@ -5,6 +5,8 @@
       :rules="[(v) => validateField(v, schema.name)]"
       :error-messages="error"
       label="Название комнаты"
+      name="room_name"
+      autocomplete="room-name"
     ></v-text-field>
 
     <v-text-field
@@ -12,6 +14,8 @@
       :rules="[(v) => validateField(v, schema.password)]"
       label="Пароль"
       type="password"
+      name="room_password"
+      autocomplete="room-password"
     ></v-text-field>
 
     <v-btn type="submit" color="success" size="large" block>Войти</v-btn>
