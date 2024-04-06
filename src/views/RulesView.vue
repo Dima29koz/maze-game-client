@@ -80,6 +80,7 @@
       class="text-end pointer-events-none"
       position="bottom"
       size="88"
+      order="-1"
       model-value
       v-scroll="onScroll"
     >

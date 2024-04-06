@@ -1,5 +1,5 @@
 <template>
-  <v-footer class="text-center d-flex flex-column w-100" :elevation="20" app>
+  <v-footer class="d-flex flex-column flex-grow-0 text-center w-100" :elevation="20" :app="false">
     <div class="d-flex align-center">
       <h4 class="">Связаться с нами</h4>
       <v-btn class="ms-4" variant="text" :href="icons.discord" target="_blank" icon>

@@ -32,18 +32,21 @@
               to="/profile_settings"
               @click="currentTab = 'profile'"
               title="Профиль"
+              prepend-icon="mdi-account-settings"
             ></v-list-item>
             <v-list-item
               to="/my_games"
               @click="currentTab = 'my_games'"
               title="История игр"
+              prepend-icon="mdi-history"
             ></v-list-item>
             <v-divider class="mt-2"></v-divider>
             <v-list-item
               @click="logout"
               type="button"
-              class="font-weight-bold"
+              class="text-red-accent-4"
               title="Выйти"
+              prepend-icon="mdi-logout"
             ></v-list-item>
           </v-list>
         </v-menu>
@@ -59,13 +62,13 @@
     </template>
   </v-app-bar>
 
-  <v-navigation-drawer v-model="sidebar" temporary>
+  <v-navigation-drawer v-model="sidebar" temporary order="-1">
     <v-list :lines="false" nav>
-      <v-list-item to="/">Главная</v-list-item>
+      <v-list-item to="/" prepend-icon="mdi-home">Главная</v-list-item>
       <template v-if="currentUser.isAuth">
-        <v-list-item to="/play">Играть</v-list-item>
+        <v-list-item to="/play" prepend-icon="mdi-controller-classic">Играть</v-list-item>
       </template>
-      <v-list-item to="/rules">Правила</v-list-item>
+      <v-list-item to="/rules" prepend-icon="mdi-book-open-variant">Правила</v-list-item>
     </v-list>
 
     <v-list
@@ -119,7 +122,6 @@
       ></v-list-item>
     </v-list>
   </v-navigation-drawer>
-  <navbar-footer v-if="tocStore.showFooter"></navbar-footer>
 </template>
 
 <script>
@@ -129,7 +131,6 @@ import { useCurrentUserStore } from '@/stores/currentUserStore'
 import { useTocStore } from '@/stores/tocStore'
 
 import ColorModeToggler from '@/components/UI/ColorModeToggler.vue'
-import NavbarFooter from '@/components/NavbarFooter.vue'
 
 export default {
   name: 'navbar-header',
@@ -152,8 +153,7 @@ export default {
     }
   },
   components: {
-    ColorModeToggler,
-    NavbarFooter
+    ColorModeToggler
   },
   methods: {
     logout() {

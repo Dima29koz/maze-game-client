@@ -14,16 +14,23 @@
       class="pa-2"
     >
       <template v-slot:item="{ item, index }">
-        <tr>
+        <tr @click="joinGame(item)" class="cursor-pointer" title="Перейти к игре">
           <td>{{ index + 1 }}</td>
-          <td>{{ item.name }}</td>
-          <td>{{ getStateTitle(item.status) }}</td>
-          <td>{{ item.winner }}</td>
-          <td>
-            <v-btn @click="joinGame(item)" density="compact" icon>
-              <v-icon icon="mdi-login" color="success"></v-icon>
-            </v-btn>
+          <td class="overflow-x-hidden" style="max-width: 120px">
+            <v-badge
+              v-if="item.status !== 'ended'"
+              :content="states[item.status]['badge']"
+              :color="states[item.status]['color']"
+              offset-x="-4"
+              floating
+            >
+              {{ item.name }}
+            </v-badge>
+            <template v-else>
+              {{ item.name }}
+            </template>
           </td>
+          <td class="overflow-x-hidden" style="max-width: 120px">{{ item.winner }}</td>
         </tr>
       </template>
 
@@ -47,15 +54,13 @@ export default {
       headers: [
         { title: '#', key: '_', sortable: false },
         { title: 'Лобби', key: 'name' },
-        { title: 'Статус', key: 'status' },
-        { title: 'Победитель', key: 'winner' },
-        { title: 'Присоединиться', key: '_', sortable: false }
+        { title: 'Победитель', key: 'winner' }
       ],
-      states: [
-        { title: 'Создана', key: 'created' },
-        { title: 'Не завершена', key: 'running' },
-        { title: 'Завершена', key: 'ended' }
-      ]
+      states: {
+        created: { title: 'Создана', badge: 'new', color: 'success' },
+        running: { title: 'Не завершена', badge: 'идет', color: 'primary' },
+        ended: { title: 'Завершена' }
+      }
     }
   },
 
@@ -68,10 +73,6 @@ export default {
       } else {
         this.$router.push({ name: 'game', query: { game: token } })
       }
-    },
-
-    getStateTitle(state) {
-      return this.states.find((p) => p.key === state).title
     }
   },
 

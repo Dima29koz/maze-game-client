@@ -1,5 +1,5 @@
 <template>
-  <v-card class="mx-auto mb-1" density="compact" min-width="200">
+  <v-card class="mx-auto mb-1" density="compact" min-width="200" height="52">
     <template v-slot:prepend v-if="player.name">
       <v-avatar v-if="!is_bot" :image="avatarSrc" size="32"> </v-avatar>
       <v-icon v-else icon="mdi-robot-angry" size="large"></v-icon>

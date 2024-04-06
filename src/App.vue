@@ -1,6 +1,6 @@
 <template>
   <v-app>
-    <Navbar></Navbar>
+    <navbar-header></navbar-header>
     <v-main>
       <RouterView />
       <div class="notificationContainer">
@@ -17,22 +17,27 @@
         </v-slide-y-transition>
       </div>
     </v-main>
+    <navbar-footer v-if="tocStore.showFooter"></navbar-footer>
   </v-app>
 </template>
 
 <script>
-import Navbar from '@/components/NavbarHeader.vue'
+import NavbarHeader from '@/components/NavbarHeader.vue'
+import NavbarFooter from '@/components/NavbarFooter.vue'
 import { useCurrentUserStore } from '@/stores/currentUserStore'
+import { useTocStore } from '@/stores/tocStore'
 import { useNotificationsStore } from './stores/notificationsStore'
 
 export default {
   setup() {
     const notificationsStore = useNotificationsStore()
-    return { notificationsStore }
+    const tocStore = useTocStore()
+    return { notificationsStore, tocStore }
   },
 
   components: {
-    Navbar
+    NavbarHeader,
+    NavbarFooter
   },
 
   async mounted() {

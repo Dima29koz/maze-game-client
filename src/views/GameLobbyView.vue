@@ -6,11 +6,18 @@
       </h1>
       <v-btn @click="leaveRoom" color="red">Покинуть игру</v-btn>
     </div>
-    <div v-if="is_creator">
-      <v-btn @click="startGame" :disabled="!room_data.is_ready">Начать игру</v-btn>
+    <div v-if="is_creator" class="text-center my-2 w-100">
+      <v-btn
+        @click="startGame"
+        :disabled="!room_data.is_ready"
+        block
+        :color="room_data.is_ready ? 'success' : ''"
+      >
+        Начать игру
+      </v-btn>
     </div>
-    <div class="d-flex">
-      <div id="players-cards" class="me-4">
+    <div class="d-flex flex-sm-row flex-column w-100">
+      <div id="players-cards" class="me-sm-4 mb-sm-0 me-0 mb-2">
         <template v-for="(player_data, i) in room_data.players" :key="i">
           <game-lobby-player-card
             :player="player_data"
@@ -30,8 +37,15 @@
           ></game-lobby-player-card>
         </template>
       </div>
-      <div id="map-container">
-        <canvas class="border" id="map"></canvas>
+      <div class="mb-1">
+        <v-alert class="mb-2" density="compact" type="info" variant="tonal">
+          Для выбора места появления нажмите на одну из клеток поля. Данное действие
+          <b>невозможно</b> отменить.
+        </v-alert>
+
+        <div id="map-container" class="text-center h-100">
+          <canvas class="border" id="map"></canvas>
+        </div>
       </div>
     </div>
   </v-container>
@@ -57,7 +71,6 @@ export default {
 
   data: () => ({
     room_name: '',
-    room_id: null,
     socket: null,
     room_data: {
       bots: [],
@@ -152,6 +165,21 @@ export default {
 
     this.socket.on('error', (error) => {
       console.log(error)
+      if (error.type === 'start') {
+        if (error.msg === 'all players should join and select spawn') {
+          this.notificationsStore.addNotification(
+            'Для начала игры необходимо, чтобы все игроки присоединилсь к лобби и выбрали точки появления.',
+            'warning'
+          )
+        }
+        if (error.msg === 'only creator allowed to start game') {
+          this.notificationsStore.addNotification(
+            'Начать игру может только создатель комнаты.',
+            'warning'
+          )
+        }
+        this.room_data.is_ready = false
+      }
     })
 
     this.socket.on('join', (data) => {
